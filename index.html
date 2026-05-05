@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Index</title>
+
+  <!-- =====================================================
+       FUENTES: Usamos "Press Start 2P" (pixel font retro)
+       y "VT323" para texto de estilo terminal/monitor CRT.
+       Se cargan desde Google Fonts.
+  ====================================================== -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ===================================================
+       VARIABLES GLOBALES DE COLOR Y ESTILO
+       Usamos variables CSS para mantener consistencia.
+    =================================================== */
+    :root {
+      --win-blue: #000080;       /* Azul clásico de Windows XP */
+      --win-title: #0a246a;      /* Azul oscuro para barras de título */
+      --win-gray: #d4d0c8;       /* Gris clásico de Windows */
+      --win-border-light: #ffffff;
+      --win-border-dark: #808080;
+      --win-border-shadow: #404040;
+      --taskbar-bg: #245edb;
+      --btn-face: #d4d0c8;
+      --text-dark: #000000;
+      --highlight: #316ac5;
+    }
+
+    /* ===================================================
+       RESET BÁSICO
+       Eliminamos márgenes y paddings por defecto del navegador.
+    =================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ===================================================
+       BODY / FONDO PRINCIPAL
+       El fondo simula el escritorio de Windows XP (Bliss).
+       Usamos un gradiente que imita el cielo azul y el pasto verde.
+    =================================================== */
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+
+      background-image: url("https://i.postimg.cc/XY1mb78Z/fondo-final.png");
+      background-size: cover;        /* Cubre toda la pantalla */
+      background-position: center;   /* Centra la imagen */
+      background-repeat: no-repeat;
+
+      cursor: default;
+      position: relative;
+      user-select: none;
+    }
+
+    /* ===================================================
+       CONTENEDOR PRINCIPAL: la pantalla del monitor CRT
+       Simula el marco de una computadora de los 2000s.
+       Está centrada en la pantalla.
+    =================================================== */
+    #monitor-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 820px;
+      height: 580px;
+      background: linear-gradient(145deg, #e8e4dc, #c8c4bc, #a8a49c);
+      border-radius: 16px;
+      box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.6),
+        inset -2px -2px 6px rgba(0,0,0,0.4),
+        0 20px 60px rgba(0,0,0,0.8),
+        0 4px 20px rgba(0,0,0,0.5);
+      padding: 18px 18px 50px 18px; /* Espacio abajo para los botones del monitor */
+    }
+
+    /* ===================================================
+       PANTALLA INTERIOR DEL MONITOR
+       Aquí se verá el "escritorio" de Windows XP con el
+       fondo de Bliss y los iconos.
+    =================================================== */
+    #screen {
+      width: 100%;
+      height: 100%;
+      background-image: url("https://i.postimg.cc/XY1mb78Z/fondo-final.png");
+      background-size: cover;        /* Cubre toda la pantalla */
+      background-position: center;   /* Centra la imagen */
+      background-repeat: no-repeat;
+      border: 3px solid #111;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      /* Efecto scanlines del monitor CRT */
+      background-color: #000;
+    }
+
+    /* ===================================================
+       EFECTO SCANLINES (líneas horizontales del monitor CRT)
+       Se logra con un pseudo-elemento ::after que cubre
+       toda la pantalla con líneas semi-transparentes.
+    =================================================== */
+    #screen::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none; /* No bloquea los clics */
+      z-index: 9999;
+    }
+
+    /* ===================================================
+       BOTONES DECORATIVOS DEL MONITOR
+       Los botones físicos del monitor CRT (decorativos).
+    =================================================== */
+    #monitor-buttons {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .monitor-btn {
+      width: 18px;
+      height: 6px;
+      background: linear-gradient(180deg, #b0acaa, #888480);
+      border-radius: 3px;
+      box-shadow: inset 0 1px rgba(255,255,255,0.4), 0 1px rgba(0,0,0,0.4);
+    }
+
+    .monitor-btn.power {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #44ee44, #228822);
+      box-shadow: 0 0 6px #44ee44, inset 0 1px rgba(255,255,255,0.4);
+    }
+
+    /* ===================================================
+       ÁREA DE ÍCONOS DEL ESCRITORIO
+       Los iconos en el lado izquierdo de la pantalla.
+    =================================================== */
+    #desktop-icons {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 10;
+    }
+
+    /* ===================================================
+       CADA ÍCONO DEL ESCRITORIO
+       Estructura: imagen arriba + texto del nombre abajo.
+    =================================================== */
+    .desktop-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 54px;
+      cursor: pointer;
+      padding: 3px;
+      border-radius: 2px;
+      gap: 3px;
+      transition: background 0.1s;
+    }
+
+    /* Resalte al pasar el mouse */
+    .desktop-icon:hover {
+      background: rgba(49, 106, 197, 0.35);
+      outline: 1px dotted rgba(255,255,255,0.7);
+    }
+
+    /* La imagen del ícono */
+    .desktop-icon .icon-img {
+      width: 45px;
+      height: 45px;
+      image-rendering: pixelated; /* Pixelado estilo retro */
+    }
+
+    /* Nombre del ícono */
+    .desktop-icon span {
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      color: white;
+      text-align: center;
+      text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; /* Sombra para legibilidad */
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    /* ===================================================
+       CONTENEDOR DE VENTANAS (pestañas)
+       Todas las ventanas flotan dentro de la pantalla.
+    =================================================== */
+    #windows-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none; /* El contenedor no bloquea clics */
+      z-index: 20;
+    }
+
+    /* ===================================================
+       VENTANA GENÉRICA (estilo Windows XP)
+       Cada "pestaña" es una ventana arrastrablde.
+    =================================================== */
+    .window {
+      position: absolute;
+      background: var(--win-gray);
+      border: 2px solid;
+      border-color: var(--win-border-light) var(--win-border-dark) var(--win-border-dark) var(--win-border-light);
+      box-shadow: 2px 2px 0 var(--win-border-shadow);
+      min-width: 200px;
+      min-height: 120px;
+      pointer-events: all; /* Las ventanas sí reciben clics */
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.15s;
+    }
+
+    /* Ventana minimizada: se oculta pero no se elimina */
+    .window.minimized {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.1);
+    }
+
+    /* Ventana maximizada: ocupa toda la pantalla */
+    .window.maximized {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ===================================================
+       BARRA DE TÍTULO DE LA VENTANA
+       La barra azul con el nombre de la ventana y los botones.
+    =================================================== */
+    .window-titlebar {
+      background: linear-gradient(180deg, #2a6dd9 0%, #1a4db0 40%, #1048aa 100%);
+      padding: 3px 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: move; /* Indica que se puede arrastrar */
+      flex-shrink: 0;
+    }
+
+    /* Ícono pequeño en la barra de título */
+    .window-titlebar .title-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Texto del título */
+    .window-titlebar .title-text {
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: white;
+      font-weight: bold;
+      flex: 1;
+      text-shadow: 1px 1px #0a2080;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* ===================================================
+       BOTONES DE CONTROL DE LA VENTANA (X, □, -)
+       Los botones de cerrar, maximizar y minimizar.
+    =================================================== */
+    .window-controls {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .win-btn {
+      width: 16px;
+      height: 14px;
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      font-weight: bold;
+      color: #000;
+      background: linear-gradient(180deg, #ece9d8 0%, #d0cec4 100%);
+      border: 1px solid;
+      border-color: #fff #808080 #808080 #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding-bottom: 1px;
+    }
+
+    .win-btn:hover { background: linear-gradient(180deg, #f0ede0, #d8d5c8); }
+    .win-btn:active { border-color: #808080 #fff #fff #808080; }
+    .win-btn.close { background: linear-gradient(180deg, #f05050 0%, #c03030 100%); color: white; }
+    .win-btn.close:hover { background: linear-gradient(180deg, #ff6060, #d04040); }
+
+    /* ===================================================
+       CONTENIDO DE LA VENTANA
+       El área interior de cada ventana.
+    =================================================== */
+    .window-content {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+
+    /* ===================================================
+       BARRA DE MENÚ DE LA VENTANA (File, Edit, etc.)
+    =================================================== */
+    .window-menubar {
+      background: var(--win-gray);
+      border-bottom: 1px solid var(--win-border-dark);
+      padding: 2px 4px;
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .menu-item {
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      padding: 1px 6px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .menu-item:hover { background: var(--highlight); color: white; }
+
+    /* ===================================================
+       BARRA DE TAREAS (abajo de la pantalla)
+       La barra de tareas de Windows XP con el botón Inicio
+       y las ventanas abiertas.
+    =================================================== */
+    #taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: linear-gradient(180deg, #2a6dd9 0%, #1540b0 50%, #1040aa 100%);
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      gap: 4px;
+      z-index: 100;
+      border-top: 1px solid #4a8ae8;
+    }
+
+    /* Botón de Inicio */
+    #start-btn {
+      background: linear-gradient(180deg, #5a9e30 0%, #3a7e18 50%, #2a6010 100%);
+      border: 1px solid;
+      border-color: #8acc50 #1a5008 #1a5008 #8acc50;
+      border-radius: 10px;
+      padding: 2px 10px 2px 6px;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Tareas en la barra de tareas */
+    .taskbar-task {
+      height: 22px;
+      background: linear-gradient(180deg, #3a7de0, #1a50b8);
+      border: 1px solid;
+      border-color: #6aaae8 #1035a0 #1035a0 #6aaae8;
+      padding: 0 8px;
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      max-width: 140px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .taskbar-task.active {
+      background: linear-gradient(180deg, #1a50b8, #2a60d0);
+      border-color: #1035a0 #6aaae8 #6aaae8 #1035a0;
+    }
+
+    .taskbar-task:hover { background: linear-gradient(180deg, #4a8de8, #2a60c8); }
+
+    /* Reloj en la barra de tareas */
+    #taskbar-clock {
+      margin-left: auto;
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: white;
+      padding: 0 8px;
+      background: rgba(0,0,80,0.3);
+      height: 22px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ===================================================
+       SEPARADOR VERTICAL (para la barra de tareas)
+    =================================================== */
+    .taskbar-sep {
+      width: 1px;
+      height: 20px;
+      background: rgba(255,255,255,0.3);
+      margin: 0 2px;
+    }
+
+    /* ===================================================
+       ESTILOS ESPECÍFICOS: VENTANA DE VIDEO (Camarón)
+       El reproductor de video con controles de volumen.
+    =================================================== */
+    #video-window .window-content {
+      background: #000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #video-player {
+      width: 100%;
+      flex: 1;
+      background: #000;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* Controles de audio personalizados */
+    .video-controls {
+      background: #1a1a2e;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid #333;
+    }
+
+    /* Botón de mute (el altavoz) */
+    #mute-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px;
+      line-height: 1;
+    }
+
+    /* Slider de volumen estilo retro */
+    #volume-slider {
+      flex: 1;
+      height: 4px;
+      appearance: none;
+      background: linear-gradient(90deg, #4a8ae8 0%, #1a4ab0 100%);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #volume-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 12px;
+      height: 14px;
+      background: linear-gradient(180deg, #ece9d8, #b8b4a8);
+      border: 1px solid #808080;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .vol-label {
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Placeholder cuando no hay video */
+    .video-placeholder {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, #1a3a0a, #0a1a04);
+      color: #44ee44;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      gap: 8px;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .shrimp-emoji { font-size: 48px; animation: bounce 1s infinite alternate; }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-8px); }
+    }
+
+    /* ===================================================
+       ESTILOS ESPECÍFICOS: VENTANA DE PERFIL (CV)
+       La ventana con información del diseñador.
+    =================================================== */
+    #profile-window .window-content {
+      display: flex;
+      background: white;
+      overflow: hidden;
+    }
+
+    /* Panel de datos del CV */
+    .cv-panel {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: #000;
+      border-right: 2px solid #d4d0c8;
+    }
+
+    .cv-section-title {
+      background: linear-gradient(90deg, #000080, #1060c0);
+      color: white;
+      padding: 3px 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
+      margin-top: 8px;
+    }
+
+    .cv-item {
+      padding: 3px 6px;
+      border-bottom: 1px dotted #ccc;
+      line-height: 1.5;
+    }
+
+    /* Panel del personaje ilustrado */
+    .character-panel {
+      width: 115px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start; 
+      justify-content: flex-end;
+      background: linear-gradient(180deg, #c8e8f8, #90c8e8);
+      
+    }
+
+    /* El personaje SVG (pixel art simple) */
+    .character-sprite {
+      width: 270px;
+      height: auto;
+      image-rendering: pixelated;
+      transform: translate(-90px, 2px);
+    }
+
+    /* ===================================================
+       ESTILOS ESPECÍFICOS: VENTANA DE CARPETA (Portafolio)
+       Simula el explorador de archivos de Windows XP.
+    =================================================== */
+    #folder-window .window-content {
+      display: flex;
+      flex-direction: column;
+      background: white;
+    }
+
+    /* Barra de dirección de la carpeta */
+    .folder-address-bar {
+      background: #f8f8f0;
+      border-bottom: 1px solid #ccc;
+      padding: 3px 8px;
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: #000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .address-input {
+      flex: 1;
+      background: white;
+      border: 1px inset #808080;
+      padding: 1px 4px;
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+    }
+
+    /* Toolbar de la carpeta con botones Atrás, Adelante, etc. */
+    .folder-toolbar {
+      background: var(--win-gray);
+      border-bottom: 1px solid var(--win-border-dark);
+      padding: 3px 6px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .folder-tool-btn {
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      padding: 2px 8px;
+      background: linear-gradient(180deg, #ece9d8, #d0cec4);
+      border: 1px solid;
+      border-color: #fff #808080 #808080 #fff;
+      cursor: pointer;
+    }
+
+    .folder-tool-btn:disabled {
+      color: #888;
+      cursor: default;
+    }
+
+    /* Contenido de la carpeta: cuadrícula de archivos */
+    .folder-content {
+      flex: 1;
+      overflow: auto;
+      background: white;
+    }
+
+    /* Vista de galería: cuadrícula de miniaturas */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 80px);
+      gap: 8px;
+      padding: 10px;
+    }
+
+    /* Cada archivo/imagen en la galería */
+    .gallery-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .gallery-item:hover { background: #d0e4ff; outline: 1px dotted #316ac5; }
+
+    .gallery-item img {
+      width: 70px;
+      height: 55px;
+      object-fit: cover;
+      border: 2px solid #808080;
+      image-rendering: pixelated;
+    }
+
+    .gallery-item span {
+      font-family: 'VT323', monospace;
+      font-size: 11px;
+      text-align: center;
+      color: #000;
+      word-break: break-all;
+    }
+
+    /* Vista de imagen individual (cuando abres una foto) */
+    .image-viewer {
+      display: none; /* Oculta por defecto */
+      flex-direction: column;
+      height: 100%;
+      background: #000;
+    }
+
+    .image-viewer.active { display: flex;}
+
+    .image-viewer img {
+      flex: 1;
+      object-fit: contain;
+      width: 100%;
+    }
+
+    .image-viewer-controls {
+      background: #222;
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .viewer-btn {
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      padding: 3px 10px;
+      background: var(--win-gray);
+      border: 1px solid;
+      border-color: #fff #808080 #808080 #fff;
+      cursor: pointer;
+    }
+
+    .gallery-view { display: flex; flex-direction: column; height: 100%; }
+    .gallery-view.hidden { display: none; }
+
+    /* ===================================================
+       ESTILOS ESPECÍFICOS: VENTANA DE INSTAGRAM
+       Simula la interfaz vieja de Instagram.
+    =================================================== */
+    #instagram-window .window-content {
+      background: #fafafa;
+      font-family: 'VT323', monospace;
+      overflow-y: auto;
+    }
+
+    /* Header de Instagram retro */
+    .ig-header {
+      background: #4e7ca0;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ig-logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: white;
+      text-shadow: 1px 1px #000;
+    }
+
+    /* Perfil en Instagram */
+    .ig-profile {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .ig-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #405de6, #833ab4, #c13584, #fd1d1d, #fcaf45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #427BBD;
+    }
+
+    .ig-profile-info { flex: 1; }
+    .ig-username { font-size: 16px; font-weight: bold; color: #262626; }
+    .ig-name { font-size: 13px; color: #888; }
+    .ig-bio { font-size: 13px; color: #262626; margin-top: 4px; }
+
+    .ig-stats {
+      display: flex;
+      gap: 12px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .ig-stat { text-align: center; }
+    .ig-stat strong { display: block; font-size: 14px; }
+    .ig-stat span { font-size: 11px; color: #888; }
+
+    /* ===================================================
+       SECCIÓN BLOQUEADA DE INSTAGRAM
+       Simula contenido bloqueado para no-seguidores.
+    =================================================== */
+    .ig-locked-section {
+      margin: 10px 12px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* El fondo pixelado detrás del bloqueo (imita posts borrosos) */
+    .ig-locked-bg {
+      background:
+        repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px);
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: blur(2px);
+    }
+
+    /* Overlay del bloqueo */
+    .ig-lock-overlay {
+      background: rgba(0,0,0,0.75);
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      overflow: visible;
+    }
+
+    .ig-lock-icon { font-size: 24px; }
+
+    .ig-lock-msg {
+      font-size: 13px;
+      color: white;
+      line-height: 1.5;
+    }
+
+    /* Botón de "Seguir en Instagram" (enlace real) */
+    .ig-follow-btn {
+      display: inline-block;
+      padding: 6px 16px;
+      background: #4E7CA0;
+      color: white;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      margin-top: 2px;
+    }
+
+    .ig-follow-btn:hover { opacity: 0.85; }
+
+    /* ===================================================
+       IMAGEN FINAL (overlay sobre la pantalla completa)
+       La imagen de fondo con efecto overlay de color.
+    =================================================== */
+    #final-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      display: none; /* Se muestra cuando se abre esta "pantalla" */
+      background: #000;
+    }
+
+    #final-overlay.active { display: block; }
+
+    #final-overlay img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* El overlay de color sobre la imagen final */
+    #final-overlay .overlay-color {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 80, 0.45); /* Azul oscuro semi-transparente */
+      mix-blend-mode: multiply;
+    }
+
+    /* Botón para cerrar el overlay final */
+    #final-overlay .close-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: 1px solid white;
+      padding: 4px 10px;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    /* ===================================================
+       UTILIDADES
+    =================================================== */
+    /* Barra de desplazamiento estilo retro */
+    .window-content::-webkit-scrollbar { width: 14px; }
+    .window-content::-webkit-scrollbar-track { background: #d4d0c8; }
+    .window-content::-webkit-scrollbar-thumb {
+      background: linear-gradient(90deg, #b8b4a8, #a0a09a);
+      border: 2px solid;
+      border-color: #fff #808080 #808080 #fff;
+    }
+
+    /* Texto de "selección" estilo Windows */
+    ::selection { background: #316ac5; color: white; }
+
+    /* ===================================================
+       RESPONSIVE: Para pantallas más pequeñas
+    =================================================== */
+    @media (max-width: 860px) {
+      #monitor-frame {
+        width: 98vw;
+        height: 90vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =====================================================
+     MONITOR CRT: El marco principal del sitio.
+     Todo el contenido vive DENTRO de este div.
+====================================================== -->
+<div id="monitor-frame">
+
+  <!-- La pantalla interior del monitor -->
+  <div id="screen">
+
+    <!-- ===================================================
+         ICONOS DEL ESCRITORIO
+         Tres iconos en el lado izquierdo, como en Windows XP.
+         Cada uno tiene: data-window = ID de la ventana que abre.
+    =================================================== -->
+    <div id="desktop-icons">
+
+      <!-- Ícono 1: Perfil/Usuario -->
+      <div class="desktop-icon" onclick="openWindow('profile-window')" ondblclick="openWindow('profile-window')">
+        <img class="icon-img" src="https://i.postimg.cc/9QgKhFpD/imagen1.png" alt="Icono Perfil"/>
+        <span>Mi Usuario</span>
+      </div>
+
+      <!-- Ícono 2: Carpeta de Portafolio -->
+      <div class="desktop-icon" onclick="openWindow('folder-window')" ondblclick="openWindow('folder-window')">
+          <img class="icon-img" src="https://i.postimg.cc/bwVWhNTd/imagen2.png" alt="Icono Archivos"/>
+          <span>Archivos</span>
+      </div>
+
+      <!-- Ícono 3: Instagram -->
+      <div class="desktop-icon" onclick="openWindow('instagram-window')" ondblclick="openWindow('instagram-window')">
+        <!-- SVG pixel art del logo de Instagram (retro) -->
+          <img class="icon-img" src="https://i.postimg.cc/kgYzmXcB/imagen3.png" alt="Icono Archivos"/>
+        <span>Instagram</span>
+      </div>
+
+    </div>
+    <!-- FIN ICONOS DEL ESCRITORIO -->
+
+
+    <!-- ===================================================
+         CONTENEDOR DE VENTANAS
+         Todas las ventanas flotantes viven aquí.
+    =================================================== -->
+    <div id="windows-container">
+
+      <!-- =================================================
+           VENTANA 1: VIDEO DEL CAMARÓN (abierta por defecto)
+           Esta ventana se muestra desde que carga la página.
+      ================================================== -->
+      <div class="window" id="video-window" style="width:300px; height:240px; top:30px; left:450px;">
+
+        <!-- Barra de título -->
+        <div class="window-titlebar" onmousedown="startDrag(event, 'video-window')">
+          <span class="title-icon">🦐</span>
+          <span class="title-text">Camarón.avi</span>
+          <!-- Botones de control: minimizar, maximizar, cerrar -->
+          <div class="window-controls">
+            <button class="win-btn" onclick="minimizeWindow('video-window')" title="Minimizar">_</button>
+            <button class="win-btn" onclick="maximizeWindow('video-window')" title="Maximizar">□</button>
+            <button class="win-btn close" onclick="closeWindow('video-window')" title="Cerrar">✕</button>
+          </div>
+        </div>
+
+        <!-- Barra de menú -->
+        <div class="window-menubar">
+          <span class="menu-item">Archivo</span>
+          <span class="menu-item">Reproducir</span>
+          <span class="menu-item">Ver</span>
+        </div>
+
+        <!-- Contenido: el video -->
+        <div class="window-content" style="display:flex; flex-direction:column;">
+
+          <!-- 
+            VIDEO ELEMENT: Aquí va tu video del camarón.
+            - src: Cambia "tu-video.mp4" por la ruta a tu video.
+            - autoplay loop: empieza a reproducir automáticamente en bucle.
+            - muted: empieza sin sonido (buena práctica de navegador).
+            - id="shrimp-video": para controlarlo con JavaScript.
+          -->
+          <video id="shrimp-video" style="flex:1; background:#000; width:100%;"
+           autoplay loop muted playsinline>
+            <source src="shrimp quartet.mp4" type="video/mp4"/>
+          </video>
+
+          <!-- Controles de volumen personalizados -->
+          <div class="video-controls">
+
+            <!-- Botón para silenciar/activar audio -->
+            <!-- onclick llama la función toggleMute() de JavaScript -->
+            <button id="mute-btn" onclick="toggleMute()" title="Mute/Unmute">🔊</button>
+
+            <!-- Slider de volumen -->
+            <!-- oninput llama setVolume() cada que el usuario mueve el slider -->
+            <input type="range" id="volume-slider"
+                   min="0" max="1" step="0.05" value="0.7"
+                   oninput="setVolume(this.value)"
+                   title="Volumen"/>
+
+            <span class="vol-label" id="vol-display">70%</span>
+          </div>
+
+        </div>
+      </div>
+      <!-- FIN VENTANA VIDEO -->
+
+
+      <!-- =================================================
+           VENTANA 2: PERFIL / CV (cerrada por defecto)
+           Se abre al hacer clic en el ícono de usuario.
+      ================================================== -->
+      <div class="window" id="profile-window" style="width:460px; height:320px; top:50px; left:80px; display:none;">
+
+        <div class="window-titlebar" onmousedown="startDrag(event, 'profile-window')">
+          <span class="title-icon">👤</span>
+          <span class="title-text">Mi Usuario - Propiedades</span>
+          <div class="window-controls">
+            <button class="win-btn" onclick="minimizeWindow('profile-window')">_</button>
+            <button class="win-btn" onclick="maximizeWindow('profile-window')">□</button>
+            <button class="win-btn close" onclick="closeWindow('profile-window')">✕</button>
+          </div>
+        </div>
+
+        <div class="window-menubar">
+          <span class="menu-item">Archivo</span>
+          <span class="menu-item">Editar</span>
+          <span class="menu-item">Ayuda</span>
+        </div>
+
+        <div class="window-content" style="display:flex; height:100%;">
+
+          <!-- Panel izquierdo: datos del CV -->
+          <div class="cv-panel">
+
+            <div class="cv-section-title">► DATOS PERSONALES</div>
+
+            <!--
+              INSTRUCCIÓN: Modifica estos datos con tu información real.
+              Cada .cv-item es una línea de información.
+            -->
+            <div class="cv-item">🪽​ Nombre: Michaelis</div>
+            <div class="cv-item">🎂 Edad: 22 años</div>
+            <div class="cv-item">📍 Ciudad: Cuautitlán Izcalli</div>
+            <div class="cv-item">📧 Email: fannytouka25@gmail.com</div>
+
+            <div class="cv-section-title">► HABILIDADES</div>
+            <div class="cv-item">🎬 Diseño Multimedia</div>
+            <div class="cv-item">🎨 Artes Plásticas</div>
+            <div class="cv-item">🖥️ Suite Adobe</div>
+            <div class="cv-item">📸 Fotografía</div>
+
+            <div class="cv-section-title">► EDUCACIÓN</div>
+            <div class="cv-item">🏫 Universidad Anáhuac México</div>
+            <div class="cv-item">📅 2022 - 2026</div>
+
+            <div class="cv-section-title">► SOBRE MÍ</div>
+            <div class="cv-item" style="line-height:1.8;">
+              Diseñador multimedia apasionado por los videojuegos y el arte. En constante aprendizaje.
+            </div>
+
+          </div>
+
+          <!-- Panel derecho: el personaje pixel art -->
+          <div class="character-panel">
+            <!--
+              INSTRUCCIÓN: Aquí va la imagen de tu personaje.
+              Cambia "tu-personaje.png" por la ruta a tu imagen.
+              Debe ser una ilustración de cuerpo completo.
+            -->
+            <img src="https://i.postimg.cc/y8ptHYP3/personaje.png" alt="Personaje" class="character-sprite"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+
+            <!-- Personaje de respaldo si no hay imagen: SVG pixel art simple -->
+            <svg style="display:none; width:80px;" viewBox="0 0 40 80" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cabeza -->
+              <rect x="10" y="2" width="20" height="20" fill="#f0c080"/>
+              <!-- Cabello rojo -->
+              <rect x="10" y="2" width="20" height="6" fill="#cc2020"/>
+              <rect x="8" y="4" width="4" height="10" fill="#cc2020"/>
+              <rect x="28" y="4" width="4" height="10" fill="#cc2020"/>
+              <!-- Ojos -->
+              <rect x="14" y="10" width="3" height="3" fill="#333"/>
+              <rect x="23" y="10" width="3" height="3" fill="#333"/>
+              <!-- Cuerpo (chamarra) -->
+              <rect x="8" y="22" width="24" height="24" fill="#333"/>
+              <rect x="12" y="24" width="16" height="14" fill="#f0f0f0"/>
+              <!-- Pantalón -->
+              <rect x="10" y="46" width="9" height="16" fill="#222266"/>
+              <rect x="21" y="46" width="9" height="16" fill="#222266"/>
+              <!-- Zapatos -->
+              <rect x="9" y="62" width="11" height="5" fill="#cc2020"/>
+              <rect x="20" y="62" width="11" height="5" fill="#cc2020"/>
+              <!-- Brazos -->
+              <rect x="2" y="22" width="6" height="16" fill="#333"/>
+              <rect x="32" y="22" width="6" height="16" fill="#333"/>
+              <!-- Manos -->
+              <rect x="1" y="38" width="6" height="6" fill="#f0c080"/>
+              <rect x="33" y="38" width="6" height="6" fill="#f0c080"/>
+            </svg>
+
+          </div>
+
+        </div>
+      </div>
+      <!-- FIN VENTANA PERFIL -->
+
+
+      <!-- =================================================
+           VENTANA 3: CARPETA / PORTAFOLIO (cerrada por defecto)
+           Simula el explorador de archivos de Windows XP.
+      ================================================== -->
+      <div class="window" id="folder-window" style="width:439px; height:80%; top:60px; left:120px; display:none;">
+
+        <div class="window-titlebar" onmousedown="startDrag(event, 'folder-window')">
+          <span class="title-icon">📁</span>
+          <span class="title-text">Mis Documentos\Portafolio</span>
+          <div class="window-controls">
+            <button class="win-btn" onclick="minimizeWindow('folder-window')">_</button>
+            <button class="win-btn" onclick="maximizeWindow('folder-window')">□</button>
+            <button class="win-btn close" onclick="closeWindow('folder-window')">✕</button>
+          </div>
+        </div>
+
+        <!-- Toolbar con botón de Atrás -->
+        <div class="folder-toolbar">
+          <button class="folder-tool-btn" id="back-btn" onclick="closeImageViewer()" disabled>◄ Atrás</button>
+          <button class="folder-tool-btn">Ver</button>
+          <button class="folder-tool-btn">Herramientas</button>
+        </div>
+
+        <!-- Barra de dirección -->
+        <div class="folder-address-bar">
+          <span>📍</span>
+          <input class="address-input" type="text" value="C:\Mis Documentos\Portafolio" readonly/>
+        </div>
+
+        <!-- Contenido de la carpeta -->
+        <div class="folder-content" id="folder-content">
+
+          <!-- Vista de galería (cuadrícula de miniaturas) -->
+          <div class="gallery-view" id="gallery-view">
+            <div class="gallery-grid" id="gallery-grid">
+              <!--
+                INSTRUCCIÓN: Agrega tus imágenes del portafolio aquí.
+                Copia el bloque .gallery-item para cada imagen que tengas.
+                - src: ruta a tu imagen
+                - alt: descripción
+                - onclick: llama openImage() con la ruta y nombre
+              -->
+
+              <div class="gallery-item" onclick="openImage('ADDjpg.jpg', 'Proyecto 01')">
+                <img src="ADDjpg.jpg" alt="Proyecto 01"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'55\'><rect width=\'70\' height=\'55\' fill=\'%23ddd\'/><text x=\'35\' y=\'32\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23888\'>IMG</text></svg>'"/>
+                <span>Proyecto_01.jpg</span>
+              </div>
+
+              <div class="gallery-item" onclick="openImage('Astarion.png', 'Proyecto 02')">
+                <img src="Astarion.png" alt="Proyecto 02"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'55\'><rect width=\'70\' height=\'55\' fill=\'%23ddd\'/><text x=\'35\' y=\'32\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23888\'>IMG</text></svg>'"/>
+                <span>Proyecto_02.jpg</span>
+              </div>
+
+              <div class="gallery-item" onclick="openImage('Tengu.jpg', 'Proyecto 03')">
+                <img src="Tengu.jpg" alt="Proyecto 03"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'55\'><rect width=\'70\' height=\'55\' fill=\'%23ddd\'/><text x=\'35\' y=\'32\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23888\'>IMG</text></svg>'"/>
+                <span>Proyecto_03.jpg</span>
+              </div>
+
+              <div class="gallery-item" onclick="openImage('PoetNocturnal.png', 'Proyecto 04')">
+                <img src="PoetNocturnal.png" alt="Proyecto 04"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'55\'><rect width=\'70\' height=\'55\' fill=\'%23ddd\'/><text x=\'35\' y=\'32\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23888\'>IMG</text></svg>'"/>
+                <span>Proyecto_04.jpg</span>
+              </div>
+
+              <div class="gallery-item" onclick="openImage('Moth.jpg', 'Proyecto 05')">
+                <img src="Moth.jpg" alt="Proyecto 05"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'55\'><rect width=\'70\' height=\'55\' fill=\'%23ddd\'/><text x=\'35\' y=\'32\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23888\'>IMG</text></svg>'"/>
+                <span>Proyecto_05.jpg</span>
+              </div>
+
+              <div class="gallery-item" onclick="openImage('Bibinos.png', 'Proyecto 06')">
+                <img src="Bibinos.png" alt="Proyecto 06"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'55\'><rect width=\'70\' height=\'55\' fill=\'%23ddd\'/><text x=\'35\' y=\'32\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23888\'>IMG</text></svg>'"/>
+                <span>Proyecto_06.jpg</span>
+              </div>
+
+              <!-- Agrega más .gallery-item aquí siguiendo el mismo patrón -->
+
+            </div>
+          </div>
+          <!-- FIN GALLERY VIEW -->
+
+          <!-- Vista de imagen individual (oculta por defecto) -->
+          <div class="image-viewer" id="image-viewer">
+            <img id="viewer-img" src="" alt="" style="flex:1; object-fit:contain; width:100%; background:#000;"/>
+            <div class="image-viewer-controls">
+              <button class="viewer-btn" onclick="closeImageViewer()">◄ Volver a galería</button>
+              <span id="viewer-filename" style="font-family:'VT323',monospace; font-size:13px; color:#ccc; margin-left:auto;"></span>
+            </div>
+          </div>
+          <!-- FIN IMAGE VIEWER -->
+
+        </div>
+      </div>
+      <!-- FIN VENTANA CARPETA -->
+
+
+      <!-- =================================================
+           VENTANA 4: INSTAGRAM (cerrada por defecto)
+           Simula la interfaz retro de Instagram.
+      ================================================== -->
+      <div class="window" id="instagram-window" style="width:320px; height:380px; top:40px; left:200px; display:none;">
+
+        <div class="window-titlebar" onmousedown="startDrag(event, 'instagram-window')">
+          <span class="title-icon">📷</span>
+          <span class="title-text">Instagram - Explorer</span>
+          <div class="window-controls">
+            <button class="win-btn" onclick="minimizeWindow('instagram-window')">_</button>
+            <button class="win-btn" onclick="maximizeWindow('instagram-window')">□</button>
+            <button class="win-btn close" onclick="closeWindow('instagram-window')">✕</button>
+          </div>
+        </div>
+
+        <div class="window-content">
+
+          <!-- Header de Instagram con gradiente -->
+          <div class="ig-header">
+            <span class="ig-logo">Instagram</span>
+            <span style="color:white; font-size:20px;">📷</span>
+          </div>
+
+          <!-- Sección de perfil -->
+          <div class="ig-profile">
+            <!-- Avatar con gradiente (o puedes poner tu foto de perfil) -->
+            <div class="ig-avatar">
+              <!--
+                INSTRUCCIÓN: Para poner tu foto de perfil real,
+                reemplaza el emoji por un <img> con tu foto.
+                Ejemplo: <img src="foto-perfil.jpg" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>
+              -->
+              <img src="profile.jpg" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>
+            </div>
+            <div class="ig-profile-info">
+              <!--
+                INSTRUCCIÓN: Cambia "@tu_usuario" por tu usuario real de Instagram.
+              -->
+              <div class="ig-username">@themichaelisvault</div>
+              <div class="ig-name">Michaelis</div>
+              <div class="ig-bio"><p>Open comissions</p>
+                <p>22 / Mexican / Artist / Designer</p></div>
+            </div>
+          </div>
+
+          <!-- Estadísticas del perfil -->
+          <div class="ig-stats">
+            <div class="ig-stat"><strong>42</strong><span>posts</span></div>
+            <div class="ig-stat"><strong>???</strong><span>seguidores</span></div>
+            <div class="ig-stat"><strong>???</strong><span>siguiendo</span></div>
+          </div>
+
+          <!-- ============================================
+               SECCIÓN BLOQUEADA
+               Esta sección simula el contenido bloqueado
+               para quienes no siguen la cuenta.
+          ============================================= -->
+          <div class="ig-locked-section">
+
+            <!-- Fondo pixelado semi-visible detrás del bloqueo -->
+            <div style="position:relative;">
+              <div class="ig-locked-bg">
+                <!-- Simula posts borrosos en el fondo -->
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:100%;">
+                  <div style="background:#ccc;height:60px;"></div>
+                  <div style="background:#bbb;height:60px;"></div>
+                  <div style="background:#ddd;height:60px;"></div>
+                </div>
+              </div>
+
+              <!-- Overlay oscuro con el mensaje de bloqueo -->
+              <div class="ig-lock-overlay" style="position:absolute;inset:0;">
+                <span class="ig-lock-icon">🔒</span>
+                <p class="ig-lock-msg">
+                  Contenido bloqueado.<br/>
+                  Sigue la cuenta para desbloquear el portafolio completo.
+                </p>
+                <!--
+                  INSTRUCCIÓN: Cambia el href por la URL real de tu Instagram.
+                  Ejemplo: href="https://www.instagram.com/tu_usuario_real/"
+                -->
+                <a class="ig-follow-btn"
+                   href="https://www.instagram.com/themichaelisvault?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                   target="_blank">
+                  🔓 Desbloquear → Seguir
+                </a>
+              </div>
+
+            </div>
+          </div>
+          <!-- FIN SECCIÓN BLOQUEADA -->
+
+        </div>
+      </div>
+      <!-- FIN VENTANA INSTAGRAM -->
+
+    </div>
+    <!-- FIN WINDOWS CONTAINER -->
+
+
+    <!-- ===================================================
+         BARRA DE TAREAS (taskbar)
+         La barra inferior de Windows XP.
+    =================================================== -->
+    <div id="taskbar">
+
+      <!-- Botón Inicio (decorativo) -->
+      <button id="start-btn">
+        <span style="font-size:14px;">⊞</span> Inicio
+      </button>
+
+      <div class="taskbar-sep"></div>
+
+      <!-- Las tareas/ventanas abiertas se agregan aquí desde JavaScript -->
+      <div id="taskbar-tasks" style="display:flex; gap:4px; flex:1; overflow:hidden;"></div>
+
+      <!-- Reloj digital -->
+      <div id="taskbar-clock">00:00</div>
+
+    </div>
+    <!-- FIN BARRA DE TAREAS -->
+
+
+    <!-- ===================================================
+         OVERLAY FINAL
+         Imagen de fondo completa con overlay de color.
+         Se activa con el botón de Inicio o una acción especial.
+         INSTRUCCIÓN: Cambia "fondo-final.jpg" por tu imagen.
+    =================================================== -->
+    <div id="final-overlay">
+      <!--
+        INSTRUCCIÓN: Cambia "fondo-final.jpg" por la ruta de tu imagen de fondo.
+        Esta imagen ocupa toda la pantalla del monitor.
+      -->
+      <img src="fondo-final.jpg" alt="Fondo final"
+           onerror="this.style.display='none'; document.getElementById('final-overlay').style.background='linear-gradient(135deg,#000080,#4a0080,#800040)'"/>
+
+      <!-- El overlay de color (transparencia encima de la imagen) -->
+      <div class="overlay-color"></div>
+
+      <!-- Tu nombre/marca sobre la imagen -->
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;color:white;text-align:center;gap:16px;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:18px;text-shadow:2px 2px #000;">
+          Michaelis
+        </div>
+        <div style="font-family:'VT323',monospace;font-size:22px;text-shadow:1px 1px #000;opacity:0.8;">
+          Multimedia Designer
+        </div>
+      </div>
+
+      <!-- Botón para cerrar el overlay -->
+      <button class="close-overlay" onclick="closeOverlay()">✕ Cerrar</button>
+    </div>
+    <!-- FIN OVERLAY FINAL -->
+
+  </div>
+  <!-- FIN SCREEN -->
+
+  <!-- Botones físicos decorativos del monitor -->
+  <div id="monitor-buttons">
+    <div class="monitor-btn"></div>
+    <div class="monitor-btn"></div>
+    <div class="monitor-btn"></div>
+    <div class="monitor-btn"></div>
+    <div class="monitor-btn power"></div>
+  </div>
+
+</div>
+<!-- FIN MONITOR FRAME -->
+
+
+<!-- =====================================================
+     JAVASCRIPT
+     Toda la lógica interactiva del portafolio:
+     - Manejo de ventanas (abrir, cerrar, minimizar, maximizar, arrastrar)
+     - Controles de video
+     - Galería de imágenes
+     - Barra de tareas
+     - Reloj
+====================================================== -->
+<script>
+
+  // =====================================================
+  // ESTADO GLOBAL DE VENTANAS
+  // Registramos información de cada ventana aquí.
+  // =====================================================
+  const windowState = {
+    'video-window':     { open: true,  minimized: false, maximized: false, title: '🦐 camarón.avi' },
+    'profile-window':   { open: false, minimized: false, maximized: false, title: '👤 Mi Usuario' },
+    'folder-window':    { open: false, minimized: false, maximized: false, title: '📁 Portafolio' },
+    'instagram-window': { open: false, minimized: false, maximized: false, title: '📷 Instagram' },
+  };
+
+  // Guarda la posición/tamaño anterior antes de maximizar
+  const prevDimensions = {};
+
+  // z-index actual (para traer ventanas al frente)
+  let topZ = 30;
+
+
+  // =====================================================
+  // ABRIR VENTANA
+  // Muestra la ventana si estaba cerrada.
+  // La "trae al frente" si ya estaba abierta.
+  // =====================================================
+  function openWindow(id) {
+    const win = document.getElementById(id);
+    const state = windowState[id];
+
+    if (!win) return;
+
+    // Si la ventana estaba minimizada, la restauramos
+    state.minimized = false;
+    win.classList.remove('minimized');
+    win.style.display = 'flex';
+    state.open = true;
+
+    // La traemos al frente aumentando su z-index
+    bringToFront(id);
+
+    // Actualizamos la barra de tareas
+    updateTaskbar();
+  }
+
+
+  // =====================================================
+  // CERRAR VENTANA
+  // Oculta la ventana y la marca como cerrada.
+  // =====================================================
+  function closeWindow(id) {
+    const win = document.getElementById(id);
+    const state = windowState[id];
+
+    if (!win) return;
+
+    win.style.display = 'none';
+    state.open = false;
+    state.minimized = false;
+    state.maximized = false;
+    win.classList.remove('maximized', 'minimized');
+
+    // Si es el video, lo pausamos al cerrar
+    if (id === 'video-window') {
+      const vid = document.getElementById('shrimp-video');
+      if (vid) vid.pause();
+    }
+
+    updateTaskbar();
+  }
+
+
+  // =====================================================
+  // MINIMIZAR VENTANA
+  // Oculta la ventana pero la deja en la barra de tareas.
+  // =====================================================
+  function minimizeWindow(id) {
+    const win = document.getElementById(id);
+    const state = windowState[id];
+
+    if (!win) return;
+
+    // Aplicamos la clase que la hace invisible (con transición CSS)
+    win.classList.add('minimized');
+    state.minimized = true;
+
+    updateTaskbar();
+  }
+
+
+  // =====================================================
+  // MAXIMIZAR / RESTAURAR VENTANA
+  // Toggle: si está normal → maximizar; si está maximizada → restaurar.
+  // =====================================================
+  function maximizeWindow(id) {
+    const win = document.getElementById(id);
+    const state = windowState[id];
+
+    if (!win) return;
+
+    if (!state.maximized) {
+      // Guardamos las dimensiones actuales para poder restaurar después
+      prevDimensions[id] = {
+        top: win.style.top,
+        left: win.style.left,
+        width: win.style.width,
+        height: win.style.height,
+      };
+      // Aplicamos la clase maximized (CSS la pone top:0, left:0, 100%x100%)
+      win.classList.add('maximized');
+      state.maximized = true;
+    } else {
+      // Restauramos las dimensiones anteriores
+      win.classList.remove('maximized');
+      const prev = prevDimensions[id];
+      if (prev) {
+        win.style.top = prev.top;
+        win.style.left = prev.left;
+        win.style.width = prev.width;
+        win.style.height = prev.height;
+      }
+      state.maximized = false;
+    }
+
+    bringToFront(id);
+  }
+
+
+  // =====================================================
+  // TRAER AL FRENTE (z-index)
+  // Cuando el usuario hace clic en una ventana, esta se
+  // pone encima de las demás aumentando su z-index.
+  // =====================================================
+  function bringToFront(id) {
+    topZ++;
+    const win = document.getElementById(id);
+    if (win) win.style.zIndex = topZ;
+  }
+
+
+  // =====================================================
+  // ACTUALIZAR BARRA DE TAREAS
+  // Regenera los botones de la barra de tareas según
+  // qué ventanas están abiertas.
+  // =====================================================
+  function updateTaskbar() {
+    const container = document.getElementById('taskbar-tasks');
+    container.innerHTML = ''; // Limpiamos los botones existentes
+
+    // Para cada ventana registrada...
+    for (const [id, state] of Object.entries(windowState)) {
+      if (!state.open) continue; // Solo si está abierta
+
+      // Creamos un botón para la barra de tareas
+      const btn = document.createElement('div');
+      btn.className = 'taskbar-task' + (state.minimized ? '' : ' active');
+      btn.textContent = state.title;
+      btn.title = state.title;
+
+      // Al hacer clic: si está minimizada → restaurar; si no → minimizar
+      btn.onclick = () => {
+        if (state.minimized) {
+          openWindow(id);
+        } else {
+          minimizeWindow(id);
+        }
+      };
+
+      container.appendChild(btn);
+    }
+  }
+
+
+  // =====================================================
+  // ARRASTRAR VENTANAS (drag & drop)
+  // Permite mover las ventanas dentro de la pantalla.
+  // =====================================================
+  let dragging = null;  // ID de la ventana que se está arrastrando
+  let dragOffX = 0;     // Desplazamiento X del mouse respecto a la ventana
+  let dragOffY = 0;     // Desplazamiento Y del mouse respecto a la ventana
+
+
+  // Se llama cuando el usuario presiona el mouse sobre la barra de título
+  function startDrag(event, id) {
+    // Solo clic izquierdo
+    if (event.button !== 0) return;
+
+    dragging = id;
+    const win = document.getElementById(id);
+    const state = windowState[id];
+
+    // No arrastrar si está maximizada
+    if (state.maximized) return;
+
+    // Calculamos dónde hizo clic el usuario dentro de la ventana
+    const rect = win.getBoundingClientRect();
+    // La pantalla del monitor tiene su propio contexto
+    const screen = document.getElementById('screen');
+    const screenRect = screen.getBoundingClientRect();
+
+    dragOffX = event.clientX - rect.left;
+    dragOffY = event.clientY - rect.top;
+
+    // Traemos la ventana al frente
+    bringToFront(id);
+
+    event.preventDefault();
+  }
+
+
+  // Se llama cuando el mouse se mueve (durante el arrastre)
+  document.addEventListener('mousemove', (event) => {
+    if (!dragging) return;
+
+    const win = document.getElementById(dragging);
+    const screen = document.getElementById('screen');
+    const screenRect = screen.getBoundingClientRect();
+
+    // Calculamos la nueva posición relativa a la pantalla del monitor
+    let newX = event.clientX - screenRect.left - dragOffX;
+    let newY = event.clientY - screenRect.top - dragOffY;
+
+    // Limitamos para que no salga de la pantalla
+    const maxX = screen.offsetWidth - win.offsetWidth;
+    const maxY = screen.offsetHeight - win.offsetHeight;
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+
+    win.style.left = newX + 'px';
+    win.style.top = newY + 'px';
+  });
+
+
+  // Se llama cuando el usuario suelta el mouse
+  document.addEventListener('mouseup', () => {
+    dragging = null; // Dejamos de arrastrar
+  });
+
+
+  // =====================================================
+  // CONTROLES DE AUDIO DEL VIDEO
+  // =====================================================
+
+  // Toggle de mute: silencia o activa el audio del video
+  function toggleMute() {
+    const video = document.getElementById('shrimp-video');
+    const btn = document.getElementById('mute-btn');
+
+    if (!video) return;
+
+    video.muted = !video.muted; // Invertimos el estado de mute
+
+    // Cambiamos el ícono del botón según el estado
+    btn.textContent = video.muted ? '🔇' : '🔊';
+  }
+
+
+  // Ajusta el volumen del video según el slider
+  function setVolume(value) {
+    const video = document.getElementById('shrimp-video');
+    const display = document.getElementById('vol-display');
+
+    if (!video) return;
+
+    video.volume = parseFloat(value);  // value va de 0 a 1
+
+    // Si sube el volumen, desmutear automáticamente
+    if (value > 0 && video.muted) {
+      video.muted = false;
+      document.getElementById('mute-btn').textContent = '🔊';
+    }
+
+    // Mostramos el porcentaje en la pantalla
+    display.textContent = Math.round(value * 100) + '%';
+  }
+
+
+  // =====================================================
+  // GALERÍA DE IMÁGENES (Carpeta de Portafolio)
+  // =====================================================
+
+  // Abre una imagen individual en el visor
+  function openImage(src, name) {
+    const galleryView = document.getElementById('gallery-view');
+    const imageViewer = document.getElementById('image-viewer');
+    const viewerImg = document.getElementById('viewer-img');
+    const viewerFilename = document.getElementById('viewer-filename');
+    const backBtn = document.getElementById('back-btn');
+
+    // Cargamos la imagen en el visor
+    viewerImg.src = src;
+    viewerImg.alt = name;
+    viewerFilename.textContent = name;
+
+    // Mostramos el visor y ocultamos la galería
+    galleryView.classList.add('hidden');
+    imageViewer.classList.add('active');
+
+    // Habilitamos el botón de "Atrás"
+    backBtn.disabled = false;
+  }
+
+
+  // Regresa a la vista de galería desde el visor
+  function closeImageViewer() {
+    const galleryView = document.getElementById('gallery-view');
+    const imageViewer = document.getElementById('image-viewer');
+    const backBtn = document.getElementById('back-btn');
+
+    // Mostramos la galería y ocultamos el visor
+    galleryView.classList.remove('hidden');
+    imageViewer.classList.remove('active');
+
+    // Deshabilitamos el botón de "Atrás"
+    backBtn.disabled = true;
+  }
+
+
+  // =====================================================
+  // OVERLAY FINAL
+  // =====================================================
+
+  // Muestra el overlay final (imagen de fondo completa)
+  function showOverlay() {
+    document.getElementById('final-overlay').classList.add('active');
+  }
+
+  // Cierra el overlay final
+  function closeOverlay() {
+    document.getElementById('final-overlay').classList.remove('active');
+  }
+
+  // Al hacer clic en el botón de Inicio → muestra el overlay final
+  document.getElementById('start-btn').addEventListener('click', showOverlay);
+
+
+  // =====================================================
+  // RELOJ EN TIEMPO REAL
+  // Actualiza el reloj de la barra de tareas cada segundo.
+  // =====================================================
+  function updateClock() {
+    const now = new Date();
+    // Formateamos las horas y minutos con dos dígitos (ej: 09:05)
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('taskbar-clock').textContent = h + ':' + m;
+  }
+
+  // Llamamos updateClock() ahora y luego cada 1000ms (1 segundo)
+  updateClock();
+  setInterval(updateClock, 1000);
+
+
+  // =====================================================
+  // INICIALIZACIÓN
+  // Al cargar la página, inicializamos el estado.
+  // =====================================================
+  window.addEventListener('load', () => {
+    // La ventana de video ya está visible en el HTML (display:flex)
+    // Solo actualizamos la barra de tareas para que aparezca su botón
+    updateTaskbar();
+
+    // Intentamos reproducir el video (algunos navegadores lo requieren)
+    const video = document.getElementById('shrimp-video');
+    if (video) {
+      video.volume = 0.7; // Volumen inicial al 70%
+      video.play().catch(() => {
+        // Si el navegador bloquea el autoplay, no hacemos nada.
+        // El usuario puede hacer clic para reproducir.
+        console.log('Autoplay bloqueado por el navegador. Haz clic para reproducir.');
+      });
+    }
+  });
+
+
+  // =====================================================
+  // TRAER VENTANA AL FRENTE AL HACER CLIC EN ELLA
+  // Cuando el usuario hace clic en cualquier parte de
+  // una ventana, la trae al frente.
+  // =====================================================
+  document.querySelectorAll('.window').forEach(win => {
+    win.addEventListener('mousedown', () => {
+      bringToFront(win.id);
+    });
+  });
+
+</script>
+
+</body>
+</html>
